@@ -1,2 +1,2 @@
-# FindParty
-FindParty Classic fanfix 버전
+# findparty
+World Of Warcraft 'Findparty' Addon.

@@ -1,5 +1,5 @@
 ﻿-------------------------------------------
--- 최종수정 : 2022/11/22
+-- 최종수정 : 2023/1/20
 
 -- 각종 필터링 정보를 담고 있는 파일입니다.
 -- 패치로 새로운 던전이 추가되거나 난이도가 추가될 경우 이 파일에서 수정하시면 됩니다.
@@ -25,11 +25,11 @@
 
 FP_DIFFICULTY_KEYWORDS = {
 	[1] = {
-		name = "영웅+",
-		dbname = "affix",
-		postfix = " |cfffcad03(H+)",
-		color = {0.5, 0.5, 0.8},
-		keywords = {"룬던", "어픽스", "쐐기", "영웅%+", "영던%+", "%(0%+%)", "%(영%+%)", "영%+"},
+		name = "티탄",
+		dbname = "titan",
+		postfix = " |cfffcad03(T)",
+		color = {0.745, 0.27, 0.84},
+		keywords = {"티탄", "티던", "룬던", "영웅%+", "영던%+", "%(0%+%)", "%(영%+%)", "영%+"},
 	},
 	[2] = {
 		name = "영웅",
@@ -175,87 +175,87 @@ FP_DUNGEON_KEYWORDS = {
 			},
 			[2] = {
 				name = "영혼의 제련소",
-				difficulty = {"heroic", "normal", "affix"},
+				difficulty = {"heroic", "normal", "titan"},
 				keywords = {"제련", "제련소", "영제"},
 			},
 			[3] = {
 				name = "사론의 구덩이",
-				difficulty = {"heroic", "normal", "affix"},
+				difficulty = {"heroic", "normal", "titan"},
 				keywords = {"사론", "샤론"},
 			},
 			[4] = {
 				name = "투영의 전당",
-				difficulty = {"heroic", "normal", "affix"},
+				difficulty = {"heroic", "normal", "titan"},
 				keywords = {"투영"},
 			},
 			[5] = {
 				name = "용사의 시험장",
-				difficulty = {"heroic", "normal", "affix"},
+				difficulty = {"heroic", "normal", "titan"},
 				keywords = {"용사", "마상", "시험장"},
 				excludekeywords = {"천둥왕", "부른다"},
 			},
 			[6] = {
 				name = "군드락",
-				difficulty = {"heroic", "normal", "affix"},
+				difficulty = {"heroic", "normal", "titan"},
 				keywords = {"군드"},
 			},
 			[7] = {
 				name = "돌의 전당",
-				difficulty = {"heroic", "normal", "affix"},
+				difficulty = {"heroic", "normal", "titan"},
 				keywords = {"돌전", "돌의"},
 			},
 			[8] = {
 				name = "드락타론 성채",
-				difficulty = {"heroic", "normal", "affix"},
+				difficulty = {"heroic", "normal", "titan"},
 				keywords = {"드락타론", "드락"},
 				excludekeywords = {"줄드락"},
 			},
 			[9] = {
 				name = "마력의 눈",
-				difficulty = {"heroic", "normal", "affix"},
+				difficulty = {"heroic", "normal", "titan"},
 				keywords = {"마눈", "마력의 눈", "마력의눈", "마력눈"},
 			},
 			[10] = {
 				name = "마력의 탑",
-				difficulty = {"heroic", "normal", "affix"},
+				difficulty = {"heroic", "normal", "titan"},
 				keywords = {"마탑", "마력의 탑", "마력의탑", "마력탑"},
 			},
 			[11] = {
 				name = "번개의 전당",
-				difficulty = {"heroic", "normal", "affix"},
+				difficulty = {"heroic", "normal", "titan"},
 				keywords = {"번개", "번전", "번던"},
 			},
 			[12] = {
 				name = "보랏빛 요새",
-				difficulty = {"heroic", "normal", "affix"},
+				difficulty = {"heroic", "normal", "titan"},
 				keywords = {"그런건없다", "요새", "보요"},
 				excludekeywords = {"정복"},
 			},
 			[13] = {
 				name = "아졸네룹",
-				difficulty = {"heroic", "normal", "affix"},
+				difficulty = {"heroic", "normal", "titan"},
 				keywords = {"아졸", "아줄"},
 			},
 			[14] = {
 				name = "안카헤트: 고대 왕국",
-				difficulty = {"heroic", "normal", "affix"},
+				difficulty = {"heroic", "normal", "titan"},
 				keywords = {"안카"},
 			},
 			[15] = {
 				name = "옛 스트라솔름",
-				difficulty = {"heroic", "normal", "affix"},
+				difficulty = {"heroic", "normal", "titan"},
 				keywords = {"옛솔", "솔름 영웅", "옛솔름", "옛솔룸"},
 				excludekeywords = {"힐스"},
 			},
 			[16] = {
 				name = "우트가드 성채",
-				difficulty = {"heroic", "normal", "affix"},
+				difficulty = {"heroic", "normal", "titan"},
 				keywords = {"우트가드 성채", "우트가드성채", "성채", "우트성채", "우투성채"},
 				excludekeywords = {"얼음왕관", "얼왕", "드락타론", "드락", "그림자", "그송", "지옥불"},
 			},
 			[17] = {
 				name = "우트가드 첨탑",
-				difficulty = {"heroic", "normal", "affix"},
+				difficulty = {"heroic", "normal", "titan"},
 				keywords = {"우트가드 첨탑", "우트가드첨탑", "첨탑", "우트첨탑", "우투첨탑"},
 				excludekeywords = {"검은바위", "하층", "상층"},
 			},
@@ -623,7 +623,7 @@ FP_DIFFICULTY_IGNORE_KEYWORDS = {
 	--시간 관련 문자열들 제거
 	"OR", "AND", "1탐", "2탐", "일시", "1시", "2시", "3시", "4시", "5시", "6시", "7시", "8시", "9시", "10시", "11시", "12시", "20시", "22시", "~1", "~10", ":33", "~33", "~20", "1~", "10~", "20~", "22:", "22~", ":55", "~55", "55분", "1:", "10:", "20:", ":0", ":1", "10월",
 	--기타 오인식 문자열 제거
-	"10/", "10렙", "10레벨", "250", "25일", "25렙", "25레벨", "1레벨", "1렙", "LV.25", "하드X", "10하드",
+	"10/", "10렙", "10레벨", "250", "25일", "25렙", "25레벨", "1레벨", "1렙", "LV.25", "하드X", "10하드", "티탄X"
 }
 
 -- 목록 툴팁에서 가독성에 영향을 주는 문자열을 사전 제거 합니다. 가능한 최소로 사용하세요.

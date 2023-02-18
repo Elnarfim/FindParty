@@ -627,12 +627,8 @@ function FP_DungeonParse(msg)
 							break
 						end
 					end
-					for i = 1, #FP_HEROIC_POSTFIX_KEYWORDS do
-						local keyword = dungeon_keyword..FP_HEROIC_POSTFIX_KEYWORDS[i]
-						if string.find(nmsg, keyword) then
-							isHeroic = true
-							break
-						end
+					if string.find(nmsg, dungeon_keyword..FP_HEROIC_POSTFIX_KEYWORDS) then
+						isHeroic = true
 					end
 					for i = 1, #heroicTable do
 						local keyword = heroicTable[i]
@@ -691,6 +687,10 @@ function FP_DungeonParse(msg)
 						end
 					end
 					if difficulty then break end
+				end
+				-- 리분 클래식 티탄 던전 체크 보강
+				if string.find(nmsg, dungeon_keyword..FP_TITAN_POSTFIX_KEYWORDS) then
+					difficulty = "titan"
 				end
 			end
 			-- 구한 난이도와 던전에 존재할 수 있는 난이도 테이블(difficultyTable)을 비교해서 난이도 최종 결정

@@ -106,7 +106,7 @@ FP_HELPS = {
 	"|cffffff00---- 원 제작자 : thenotfound (섬게이트)",
 	"|cffffff00---- 섬게 버전 수정자 : 불성: Zimbal2 Tycho74 (섬게이트), 일분일초 (스톰레이지) / 리분: 유아원때일진 (헬스크림) / 드군, 군단: 일분일초 (스톰레이지)",
 	"|cffffff00---- 인벤 버전 수정자 : 리분, 대격변, 판다, 드군: 법사세린 (아즈샤라) / 드군, 군단, 격아: 아리보리 (아즈샤라) / 격아, 어둠땅: 엘나르핌",
-	"|cffffff00---- version |cffff0000"..GetAddOnMetadata("FindParty", "version").." Classic",
+	"|cffffff00---- version |cffff0000"..GetAddOnMetadata("FindParty", "version").." MoP",
 	"\n",
 	"|cffffff00 사용법",
 	"|cffffff00  * 목록",

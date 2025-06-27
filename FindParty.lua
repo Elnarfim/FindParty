@@ -405,38 +405,13 @@ function FP_Init()
 			end
 			FP_LoadDefaultOption()
 		else
-			-- Revision 10 이전 버전 (5.04.01 이전) 버전은 강제 리셋
+			-- Revision 16 이전 버전은 강제 리셋
 			if FP_Version < 10 then
 				FP_Print(FP_MESSAGE_NEWVERSION_RESET)
 				if FP_DUNGEON_LIST then
 					FP_DUNGEON_LIST = nil
 				end
 				FP_LoadDefaultOption()
-			else
-				-- Revision 16 - noparty 삭제
-				if FP_Version < 16 then
-					FP_Options.noparty = nil
-				end
-				-- Revision 15 - 인스턴스 던전에서 비활성화 설정을 기본값으로 변경
-				if FP_Version < 15 then
-					FP_Options.noraid = true
-					FP_Options.noparty = false
-					FP_Options.nopvp = true
-				end
-				-- Revision 14 - FP_Scroll_Info 삭제
-				if FP_Version < 14 then
-					local savedViewLines
-					if FP_Scroll_Info and FP_Scroll_Info.viewLines and type(FP_Scroll_Info.viewLines) == "number" then
-						savedViewLines = FP_Scroll_Info.viewLines
-					end
-					FP_Scroll_Info = nil
-					FP_Options.viewLines = savedViewLines or 20
-				end
-				-- Revision 13 이전 버전 (5.04.05 이전) 경우 필터값이 잘못 들어가 오류가 발생할 수 있으므로 필터 정보를 리셋
-				if FP_Version < 13 then
-					FP_Filter_Dungeon = {}
-					FP_Filter_Class = nil
-				end
 			end
 		end
 
@@ -554,15 +529,64 @@ function FP_DungeonParse(msg)
 
 	-- 던전을 찾는다(인덱스 테이블이라 순서가 섞일 우려가 없기 때문에, 잡다한 처리는 모조리 삭제. 가장 최근에 출시된 인던으로 무조건 분류.. 어느정도 오분류는 감안하자)
 	for _, tbl in ipairs(FP_DUNGEON_KEYWORDS) do
-		for _, tbl2 in ipairs(tbl.dungeon) do
-			for i = 1, #tbl2.keywords do
-				local keyword = tbl2.keywords[i]
+		if tbl.dungeon then
+			for _, tbl2 in ipairs(tbl.dungeon) do
+				for i = 1, #tbl2.keywords do
+					local keyword = tbl2.keywords[i]
+					if string.find(nmsg_dungeon, keyword) then
+						local breaking
+						if tbl2.excludekeywords then
+							breaking = false
+							for j = 1, #tbl2.excludekeywords do
+								if string.find(nmsg_dungeon, tbl2.excludekeywords[j]) then
+									breaking = true
+								end
+							end
+							if breaking then break end
+						end
+						breaking = false
+						for j = 1, #FP_GLOBAL_EXCLUDE_KEYWORDS do
+							if string.find(nmsg_dungeon, FP_GLOBAL_EXCLUDE_KEYWORDS[j]) then
+								breaking = true
+							end
+						end
+						if breaking then break end
+						-- 사용자 정의 무시할 문자열 체크
+						if #custom_ignore_keywords > 0 then
+							for j = 1, #custom_ignore_keywords do
+								if string.find(nmsg_dungeon, custom_ignore_keywords[j]) then
+									breaking = true
+								end
+							end
+							if breaking then break end
+						end
+						-- 운다손, 갈레온손 같은 문자열 제거
+						local ignore = false
+						for i = 1, #FP_DUNGEON_IGNORE_POSTFIX_KEYWORDS do
+							if string.find(nmsg_dungeon, keyword..FP_DUNGEON_IGNORE_POSTFIX_KEYWORDS[i]) then
+								ignore = true
+								break
+							end
+						end
+						if ignore then break end
+						dungeon = tbl2.name
+						dungeon_keyword = keyword
+						difficultyTable = tbl2.difficulty
+						heroicTable	= tbl2.heroickeywords or {}
+						break
+					end
+				end
+				if dungeon then break end
+			end
+		else
+			for i = 1, #tbl.keywords do
+				local keyword = tbl.keywords[i]
 				if string.find(nmsg_dungeon, keyword) then
 					local breaking
-					if tbl2.excludekeywords then
+					if tbl.excludekeywords then
 						breaking = false
-						for j = 1, #tbl2.excludekeywords do
-							if string.find(nmsg_dungeon, tbl2.excludekeywords[j]) then
+						for j = 1, #tbl.excludekeywords do
+							if string.find(nmsg_dungeon, tbl.excludekeywords[j]) then
 								breaking = true
 							end
 						end
@@ -593,10 +617,10 @@ function FP_DungeonParse(msg)
 						end
 					end
 					if ignore then break end
-					dungeon = tbl2.name
+					dungeon = tbl.name
 					dungeon_keyword = keyword
-					difficultyTable = tbl2.difficulty
-					heroicTable	= tbl2.heroickeywords or {}
+					difficultyTable = tbl.difficulty
+					heroicTable	= tbl.heroickeywords or {}
 					break
 				end
 			end
@@ -607,29 +631,31 @@ function FP_DungeonParse(msg)
 
 	-- 던전을 찾았으면 던전 난이도를 구한다.
 	if dungeon then
-		-- 던전 정보를 참조해서 난이도가 하나 밖에 없으면 구할 필요가 없으므로 바로 그 난이도로 직행
+		-- 던전 정보를 참조해서 난이도가 하나 밖에 없으면 구할 필요가 없으므로 바로 그 난이도로 직행 (구 레이드, 퀘스트 등)
 		if #difficultyTable == 1 then
 			difficulty = difficultyTable[1]
 		-- 그게 아닐 경우는 구해야지
 		else
 			local difficulty_ok
-			-- 10인 25인이 존재하는 과거 던전에서만 사용
+			-- 10인 25인 레이드
 			if difficultyTable[1] == "10normal" then
 				local numDifficulty
 				local txtDifficulty
 				local isHeroic
 				-- 영웅 난이도 처리
-				if not isHeroic then
-					for i = 1, #FP_HEROIC_KEYWORDS do
-						local keyword = FP_HEROIC_KEYWORDS[i]
-						if string.find(nmsg, keyword) then
-							isHeroic = true
-							break
-						end
-					end
-					if string.find(nmsg, dungeon_keyword..FP_HEROIC_POSTFIX_KEYWORDS) then
+				for i = 1, #FP_HEROIC_KEYWORDS do
+					local keyword = FP_HEROIC_KEYWORDS[i]
+					if string.find(nmsg, keyword) then
 						isHeroic = true
+						break
 					end
+				end
+				-- 영웅 난이도를 10H 25H 등으로 표시하는 광고 체크
+				if not isHeroic and (string.find(nmsg, "%d+(.*)H") or string.find(nmsg, "%d+(.*)h") or string.find(nmsg, "(.*)H") or string.find(nmsg, "(.*)h") or string.find(nmsg, "H%d+") or string.find(nmsg, "h%d+")) then
+					isHeroic = true
+				end
+				-- heroickeywords 테이블 문자열 체크
+				if not isHeroic then
 					for i = 1, #heroicTable do
 						local keyword = heroicTable[i]
 						if string.find(nmsg, keyword) then
@@ -651,14 +677,16 @@ function FP_DungeonParse(msg)
 				end
 				-- txtDifficulty 구하기
 				for _, tbl in ipairs(FP_DIFFICULTY_KEYWORDS) do
-					for i = 1, #tbl.keywords do
-						local keyword = tbl.keywords[i]
-						if string.find(nmsg, keyword) then
-							txtDifficulty = tbl.dbname
-							break
+					if tbl.keywords then
+						for i = 1, #tbl.keywords do
+							local keyword = tbl.keywords[i]
+							if string.find(nmsg, keyword) then
+								txtDifficulty = tbl.dbname
+								break
+							end
 						end
+						if txtDifficulty then break end
 					end
-					if txtDifficulty then break end
 				end
 				-- 난이도 결정
 				if isHeroic and (numDifficulty == 25 or (txtDifficulty == "25normal")) then
@@ -672,7 +700,7 @@ function FP_DungeonParse(msg)
 				elseif txtDifficulty then
 					difficulty = txtDifficulty
 				end
-			else -- 5인 던전과 불성 클래식 레이드
+			else -- 5인 던전
 				-- 난이도 분류에 영향을 줄 수 있는 문자열 제거
 				nmsg = FP_FilterIgnoreText(nmsg, FP_DIFFICULTY_IGNORE_KEYWORDS)
 				if not nmsg then return dungeon, difficultyTable[1]	end
@@ -688,21 +716,20 @@ function FP_DungeonParse(msg)
 					end
 					if difficulty then break end
 				end
-				-- 리분 클래식 티탄 던전 체크 보강
-				if string.find(nmsg, dungeon_keyword..FP_TITAN_POSTFIX_KEYWORDS) then
-					difficulty = "titan"
-				end
 			end
 			-- 구한 난이도와 던전에 존재할 수 있는 난이도 테이블(difficultyTable)을 비교해서 난이도 최종 결정
-			-- 난이도를 구할 수 없을 경우나 잘못된 경우 던전 정보에서 가장 앞에 있는 난이도로 강제 설정
 			for i = 1, #difficultyTable do
 				if difficulty == difficultyTable[i] then
 					difficulty_ok = true
 					break
 				end
 			end
+			-- 난이도를 구할 수 없을 경우나 잘못된 경우 던전은 테이블 1번 난이도, 레이드는 2번 난이도로 강제 설정
 			if not difficulty_ok then
-				difficulty = difficultyTable[2]
+				difficulty = difficultyTable[1]
+				if string.find(difficulty, "10") then
+					difficulty = difficultyTable[2]
+				end
 			end
 		end
 	end
@@ -750,9 +777,16 @@ local function getCategory(dungeon)
 	local category
 	if dungeon then
 		for _, tbl in ipairs(FP_DUNGEON_KEYWORDS) do
-			for _, tbl2 in ipairs(tbl.dungeon) do
-				if tbl2.name == dungeon then
-					category = tbl.category
+			if tbl.dungeon then
+				for _, tbl2 in ipairs(tbl.dungeon) do
+					if tbl2.name == dungeon then
+						category = tbl.category
+						break
+					end
+				end
+			else
+				if tbl.name == dungeon then
+					category = tbl.name
 					break
 				end
 			end
@@ -767,9 +801,16 @@ local function getDungeonDifficultyTable(dungeon)
 	local difficultyTable = {}
 	if dungeon then
 		for _, tbl in ipairs(FP_DUNGEON_KEYWORDS) do
-			for _, tbl2 in ipairs(tbl.dungeon) do
-				if tbl2.name == dungeon then
-					difficultyTable = tbl2.difficulty
+			if tbl.dungeon then
+				for _, tbl2 in ipairs(tbl.dungeon) do
+					if tbl2.name == dungeon then
+						difficultyTable = tbl2.difficulty
+						break
+					end
+				end
+			else
+				if tbl.name == dungeon then
+					difficultyTable = tbl.difficulty
 					break
 				end
 			end
@@ -789,7 +830,7 @@ function FP_DropDownMenuFilterDungeon_Initialize(frame, level, menu)
 	if (level == 1) then
 		for idx, tbl in ipairs(FP_DUNGEON_KEYWORDS) do
 			info = UIDropDownMenu_CreateInfo()
-			info.text = tbl.category
+			info.text = tbl.category or tbl.name
 			info.keepShownOnClick = true
 			info.disabled = false
 			info.hasArrow = true
@@ -828,20 +869,35 @@ function FP_DropDownMenuFilterDungeon_Initialize(frame, level, menu)
 		info.keepShownOnClick = false
 		UIDropDownMenu_AddButton(info, level)
 	elseif (level == 2) then
-		for _, tbl in ipairs(FP_DUNGEON_KEYWORDS[menu].dungeon) do
+		if FP_DUNGEON_KEYWORDS[menu].dungeon then
+			for _, tbl in ipairs(FP_DUNGEON_KEYWORDS[menu].dungeon) do
+				info = UIDropDownMenu_CreateInfo()
+				info.text = tbl.name
+				info.keepShownOnClick = true
+				info.disabled = false
+				info.hasArrow = true
+				info.isNotRadio = true
+				info.func = FP_FilterDungeonSelected
+				info.checked = (FP_Filter_Dungeon[FP_DUNGEON_KEYWORDS[menu].category] and FP_Filter_Dungeon[FP_DUNGEON_KEYWORDS[menu].category][info.text]) or false
+				info.value = tbl.difficulty
+				info.menuList = info.text
+				info.arg1 = info.text
+				info.arg2 = nil
+				UIDropDownMenu_AddButton(info, level)
+			end -- for key, subarray
+		else
 			info = UIDropDownMenu_CreateInfo()
-			info.text = tbl.name
+			info.text = FP_DUNGEON_KEYWORDS[menu].name
 			info.keepShownOnClick = true
 			info.disabled = false
-			info.hasArrow = true
+			info.isNotRadio = true
 			info.func = FP_FilterDungeonSelected
-			info.checked = (FP_Filter_Dungeon[FP_DUNGEON_KEYWORDS[menu].category] and FP_Filter_Dungeon[FP_DUNGEON_KEYWORDS[menu].category][info.text]) or false
-			info.value = tbl.difficulty
-			info.menuList = info.text
-			info.arg1 = info.text
-			info.arg2 = nil
+			info.checked = (FP_Filter_Dungeon[FP_DUNGEON_KEYWORDS[menu].name] and FP_Filter_Dungeon[FP_DUNGEON_KEYWORDS[menu].name][info.text]) or false
+			info.arg1 = FP_DUNGEON_KEYWORDS[menu].name
+			info.arg2 = FP_DUNGEON_KEYWORDS[menu].difficulty[1]
+			info.value = FP_DUNGEON_KEYWORDS[menu].difficulty[1]
 			UIDropDownMenu_AddButton(info, level)
-		end -- for key, subarray
+		end
 	elseif (level == 3) then
 		info = UIDropDownMenu_CreateInfo()
 		info.keepShownOnClick = true
@@ -1152,13 +1208,85 @@ function FP_AutoDeactivate()
 	end
 end
 
+local function GetShortClassName(class, spec)
+	local short_Class = {
+		["죽음의 기사"] = {
+			["혈기"] = "혈죽",
+			["냉기"] = "냉죽",
+			["부정"] = "부죽"
+		},
+		["드루이드"] = {
+			["조화"] = "조드",
+			["야성"] = "야드",
+			["회복"] = "회드"
+		},
+		["사냥꾼"] = {
+			["야수"] = "야냥",
+			["사격"] = "격냥",
+			["생존"] = "생냥"
+		},
+		["마법사"] = {
+			["비전"] = "비법",
+			["화염"] = "화법",
+			["냉기"] = "냉법"
+		},
+		["수도사"] = {
+			["양조"] = "양조",
+			["운무"] = "운무",
+			["풍운"] = "풍운"
+		},
+		["성기사"] = {
+			["신성"] = "신기",
+			["보호"] = "보기",
+			["징벌"] = "징기"
+		},
+		["사제"] = {
+			["수양"] = "수사",
+			["신성"] = "신사",
+			["암흑"] = "암사"
+		},
+		["도적"] = {
+			["암살"] = "암살",
+			["전투"] = "전투",
+			["잠행"] = "잠행"
+		},
+		["주술사"] = {
+			["정기"] = "정술",
+			["고양"] = "고술",
+			["복원"] = "복술"
+		},
+		["흑마법사"] = {
+			["고통"] = "고흑",
+			["악마"] = "악흑",
+			["파괴"] = "파흑"
+		},
+		["전사"] = {
+			["무기"] = "무전",
+			["분노"] = "분전",
+			["방어"] = "전탱"
+		}
+	}
+	return short_Class[class][spec]
+end
+
 function FP_Whisper(target)
 	local msg = FP_MenuFrameWhText:GetText()
 	FP_UserDefinedWhMsg = msg -- For save
 	if (not msg or string.len(msg) == 0) then
 		local playerClass = UnitClass("player")
-		local myTalent = FP_GetMyTalent()
-		msg = string.format(FP_DEFAULT_WHISPER, myTalent, playerClass)
+		local playerSpec = ""
+		local shortName
+		if UnitLevel("player") >= 10 then
+			playerSpec = select(2, C_SpecializationInfo.GetSpecializationInfo(C_SpecializationInfo.GetSpecialization()))
+			if GetLocale() == "koKR" then
+				shortName = GetShortClassName(playerClass, playerSpec)
+			end
+		end
+		if shortName then
+			msg = string.format("%s 손이요~", shortName)
+		else
+			msg = string.format(FP_DEFAULT_WHISPER, playerSpec, playerClass)
+		end
 	end
 
 	SendChatMessage(msg, "WHISPER", nil, target)
@@ -1174,28 +1302,6 @@ function FP_Exception(target)
 
 	FP_Print(string.format(FP_MESSAGE_EXCEPTION, target))
 	FP_Refresh(true)
-end
-
-function FP_GetMyTalent()
-	local myTalent
-	local talent_tree = {}
-	if UnitLevel("player") >= 10 then
-		for i=1, GetNumTalentTabs() do
-			talent_tree[i] = select(3, GetTalentTabInfo(i))
-		end
-		for k, v in pairs(talent_tree) do
-			if k > 1 and v > talent_tree[k-1] then
-				myTalent = k
-			else
-				myTalent = 1
-			end
-		end
-		myTalent = GetTalentTabInfo(myTalent)
-	else
-		myTalent = ""
-	end
-
-	return myTalent
 end
 
 ------------------------------
@@ -1926,7 +2032,7 @@ function FP_OnLoad()
 end
 
 function FP_OnEvent(self, event, ...)
-	if event=="VARIABLES_LOADED" then
+	if event == "VARIABLES_LOADED" then
 		FP_InviteControlFrame:UnregisterEvent("VARIABLES_LOADED")
 		FP_Init()
 	end

@@ -468,6 +468,34 @@ function FP_Init()
 	end
 end
 
+---------------------
+-- 확장팩 업데이트 --
+---------------------
+local function FP_UpdateExpansion(update)
+	if update then
+		FP_InviteControlFrame:UnegisterEvent("UPDATE_EXPANSION_LEVEL")
+	end
+	for i = 1, 6 do
+		FP_DUNGEON_KEYWORDS[4].dungeon[i].difficulty = {"legacy"}
+	end
+end
+
+local function FP_CheckDate()
+	if tonumber(date("%m")) == 7 then
+		if tonumber(date("%d")) < 22 then
+			FP_InviteControlFrame:RegisterEvent("UPDATE_EXPANSION_LEVEL")
+		elseif tonumber(date("%d")) == 22 and tonumber(date("%H")) < 7 then
+			FP_InviteControlFrame:RegisterEvent("UPDATE_EXPANSION_LEVEL")
+		elseif tonumber(date("%d")) == 22 and tonumber(date("%H")) >= 7 then
+			FP_UpdateExpansion()
+		else
+			FP_UpdateExpansion()
+		end
+	else
+		FP_UpdateExpansion()
+	end
+end
+
 ---------------
 -- 던전 파싱 --
 ---------------
@@ -707,14 +735,16 @@ function FP_DungeonParse(msg)
 
 				-- difficulty 바로 구하기
 				for _, tbl in ipairs(FP_DIFFICULTY_KEYWORDS) do
-					for i = 1, #tbl.keywords do
-						local keyword = tbl.keywords[i]
-						if string.find(nmsg, keyword) then
-							difficulty = tbl.dbname
-							break
+					if tbl.keywords then
+						for i = 1, #tbl.keywords do
+							local keyword = tbl.keywords[i]
+							if string.find(nmsg, keyword) then
+								difficulty = tbl.dbname
+								break
+							end
 						end
+						if difficulty then break end
 					end
-					if difficulty then break end
 				end
 			end
 			-- 구한 난이도와 던전에 존재할 수 있는 난이도 테이블(difficultyTable)을 비교해서 난이도 최종 결정
@@ -2035,6 +2065,10 @@ function FP_OnEvent(self, event, ...)
 	if event == "VARIABLES_LOADED" then
 		FP_InviteControlFrame:UnregisterEvent("VARIABLES_LOADED")
 		FP_Init()
+		FP_CheckDate()
+	end
+	if event == "UPDATE_EXPANSION_LEVEL" then
+		FP_UpdateExpansion(true)
 	end
 	-- 자동 비활성화 기능 관련 이벤트 등록
 	if event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED" or event == "ZONE_CHANGED_INDOORS" or event == "ZONE_CHANGED_NEW_AREA" then

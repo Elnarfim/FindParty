@@ -1,5 +1,5 @@
 ﻿-------------------------------------------
--- 최종수정 : 2025/6/27
+-- 최종수정 : 2025/6/29
 
 -- 각종 필터링 정보를 담고 있는 파일입니다.
 -- 패치로 새로운 던전이 추가되거나 난이도가 추가될 경우 이 파일에서 수정하시면 됩니다.
@@ -16,12 +16,13 @@
 --[[
 	색상 rgb 코드
 	보라 (시즌 어픽스) 0.745, 0.27, 0.84
-	남색 (영웅 던전) 0.5 0.5 0.8
+	남색 (던전) 0.5 0.5 0.8
 	분홍 (10인 레이드) 1, 0.7, 0.7
 	주황 (25인 레이드) 1, 0.5, 0
 	노랑 (구 레이드) 1, 0.7, 0
 	녹색 (PvP) 0, 1, 0
 	청록 (도전 모드) 0, 1, 1
+	하늘색 (필드보스) 0, 0.95, 1
 	파랑 (탄력적 공격대) 0.4, 0.7, 1
 	빨강 (일분일초 버전 명예) 1, 0. 0
 ]]
@@ -83,18 +84,24 @@ FP_DIFFICULTY_KEYWORDS = {
 		keywords = {"탄력", "탄공"},
 	},
 	[9] = {
+		name = "필드보스",
+		dbname = "world",
+		postfix = "",
+		color = {0, 0.95, 1},
+	},
+	[10] = {
 		name = "구 레이드",
 		dbname = "legacy",
 		postfix = "",
 		color = {1, 0.7, 0},
 	},
-	[10] = {
+	[11] = {
 		name = "PvP",
 		dbname = "pvp",
 		postfix = "",
 		color = {0, 1, 0},
 	},
-	[11] = {
+	[12] = {
 		name = "퀘스트",
 		dbname = "quest",
 		postfix = "",
@@ -121,13 +128,13 @@ FP_DUNGEON_KEYWORDS = {
 			[1] = {
 				name = "오그리마 공성전",
 				difficulty = {"10normal", "25normal", "10heroic", "25heroic", "flex"},
-				keywords = {"오공", "오그", "공성", "가로쉬", "탄공"},
-				excludekeywords = {"니우"},
+				keywords = {"오공", "공성전"},
+				excludekeywords = {"니우", "공성전투"},
 			},
 			[2] = {
 				name = "천둥의 왕좌",
 				difficulty = {"10normal", "25normal", "10heroic", "25heroic"},
-				keywords = {"천둥", "천왕", "레이션"},
+				keywords = {"천둥", "천왕", "천둥왕"},
 				heroickeywords = {"라덴"},
 				excludekeywords = {"용사"},
 			},
@@ -148,43 +155,13 @@ FP_DUNGEON_KEYWORDS = {
 				keywords = {"모구샨", "모구산", "금고", "모금"},
 				excludekeywords = {"궁전"},
 			},
-			[6] = {
-				name = "오르도스",
-				difficulty = {"normal"},
-				keywords = {"오르", "오르도스"},--오르 손 오르도스 손 때문에 중복 등록
-			},
-			[7] = {
-				name = "네 천신",
-				difficulty = {"normal"},
-				keywords = {"천신", "츠지", "위론", "흑우", "백호", "쉬엔"},
-			},
-			[8] = {
-				name = "운다스타",
-				difficulty = {"normal"},
-				keywords = {"운다", "운다스타"},-- 마찬가지로 운다 손 운다스타 손 중복 등록
-			},
-			[9] = {
-				name = "나락크",
-				difficulty = {"normal"},
-				keywords = {"나락", "나락크"},-- 운다스타와 동일
-			},
-			[10] = {
-				name = "살리스의 전투부대",
-				difficulty = {"normal"},
-				keywords = {"갈레온", "갈리온"},
-			},
-			[11] = {
-				name = "분노의 샤",
-				difficulty = {"normal"},
-				keywords = {"샤", "분샤"},
-			},
 		},
 	},
 	[2] = {
 		category = "판다리아의 안개 던전",
 		dungeon = {
 			[1] = {
-				name = "무작위 영웅 시나리오",
+				name = "무작위 시나리오",
 				difficulty = {"normal", "heroic"},
 				keywords = {"시나리오"},
 			},
@@ -196,7 +173,7 @@ FP_DUNGEON_KEYWORDS = {
 			[3] = {
 				name = "니우짜오 사원 공성전투",
 				difficulty = {"normal", "heroic", "challenge"},
-				keywords = {"니우짜오", "니우", "공성"},
+				keywords = {"니우짜오", "니우", "사원"},
 				excludekeywords = {"오그"},
 			},
 			[4] = {
@@ -223,7 +200,7 @@ FP_DUNGEON_KEYWORDS = {
 			[8] = {
 				name = "모구샨 궁전",
 				difficulty = {"normal", "heroic", "challenge"},
-				keywords = {"모구샨", "궁전"},
+				keywords = {"궁전", "모궁"},
 				excludekeywords = {"금고"},
 			},
 			[9] = {
@@ -244,124 +221,154 @@ FP_DUNGEON_KEYWORDS = {
 		},
 	},
 	[3] = {
+		category = "판다리아의 안개 필드보스",
+		dungeon = {
+			[1] = {
+				name = "오르도스",
+				difficulty = {"world"},
+				keywords = {"오르", "오르도스"},--오르 손 오르도스 손 때문에 중복 등록
+			},
+			[2] = {
+				name = "네 천신",
+				difficulty = {"world"},
+				keywords = {"천신", "츠지", "위론", "흑우", "백호", "쉬엔"},
+			},
+			[3] = {
+				name = "운다스타",
+				difficulty = {"world"},
+				keywords = {"운다", "운다스타"},-- 마찬가지로 운다 손 운다스타 손 중복 등록
+			},
+			[4] = {
+				name = "나락크",
+				difficulty = {"world"},
+				keywords = {"나락", "나락크"},-- 운다스타와 동일
+			},
+			[5] = {
+				name = "살리스의 전투부대",
+				difficulty = {"world"},
+				keywords = {"갈레온", "갈리온"},
+			},
+			[6] = {
+				name = "분노의 샤",
+				difficulty = {"world"},
+				keywords = {"샤", "분샤"},
+			},
+		},
+	},
+	[4] = {
 		category = "대격변 공격대",
 		dungeon = {
 			[1] = {
 				name = "용의 영혼",
-				difficulty = {"legacy"},
-				keywords = {"용영", "데스윙", "울트락", "용의"},
+				difficulty = {"10normal", "25normal", "10heroic", "25heroic"},
+				keywords = {"용영"},
 			},
 			[2] = {
 				name = "불의 땅",
-				difficulty = {"legacy"},
-				keywords = {"불땅", "불의", "라그", "대표단"},
+				difficulty = {"10normal", "25normal", "10heroic", "25heroic"},
+				keywords = {"불땅"},
 				excludekeywords = {"평작"},
 			},
 			[3] = {
 				name = "검은날개 강림지",
-				difficulty = {"legacy"},
+				difficulty = {"10normal", "25normal", "10heroic", "25heroic"},
 				keywords = {"강림지", "검날", "검은날개", "검강", "네파"},
 				excludekeywords = {"둥지"},
 			},
 			[4] = {
 				name = "황혼의 요새",
-				difficulty = {"legacy"},
-				keywords = {"황요", "요새", "초갈", "시네"},
-				excludekeywords = {"고원", "시간", "투기장"},
+				difficulty = {"10normal", "25normal", "10heroic", "25heroic"},
+				keywords = {"황요", "요새"},
+				excludekeywords = {"시간", "투기장"},
 				heroickeywords = {"시네"},
 			},
 			[5] = {
 				name = "네 바람의 왕좌",
-				difficulty = {"legacy"},
-				keywords = {"네바람", "알아키르"},
+				difficulty = {"10normal", "25normal", "10heroic", "25heroic"},
+				keywords = {"네바람"},
 			},
 			[6] = {
 				name = "바라딘 요새",
-				difficulty = {"legacy"},
+				difficulty = {"10normal", "25normal"},
 				keywords = {"바라딘", "톨바"},
 				excludekeywords = {"퀘"},
 			},
 		},
 	},
-	[4] = {
+	[5] = {
 		category = "대격변 던전",
 		dungeon = {
 			[1] = {
-				name = "무작위 던전",
-				difficulty = {"normal", "heroic"},
-				keywords = {"무작"},
-			},
-			[2] = {
 				name = "시간의 끝",
 				difficulty = {"heroic"},
 				keywords = {"시끝", "시간의끝"},
 			},
-			[3] = {
+			[2] = {
 				name = "영원의 샘",
 				difficulty = {"heroic"},
 				keywords = {"영샘", "영원의"},
-				excludekeywords = {"영원의눈"},
+				excludekeywords = {"눈"},
 			},
-			[4] = {
+			[3] = {
 				name = "황혼의 시간",
 				difficulty = {"heroic"},
 				keywords = {"황혼의", "황시"},
 				excludekeywords = {"고원", "요새"},
 			},
-			[5] = {
+			[4] = {
 				name = "줄구룹",
 				difficulty = {"heroic"},
 				keywords = {"줄굽", "줄구", "즐구", "줄마트"},
 			},
-			[6] = {
+			[5] = {
 				name = "줄아만",
 				difficulty = {"heroic"},
 				keywords = {"줄아만", "공물"},
 			},
-			[7] = {
+			[6] = {
 				name = "검은바위 동굴",
 				difficulty = {"heroic", "normal"},
 				keywords = {"검바", "동굴"},
 			},
-			[8] = {
+			[7] = {
 				name = "그림 바톨",
 				difficulty = {"normal", "heroic"},
 				keywords = {"그바", "바툴", "바톨", "그림"},
 			},
-			[9] = {
+			[8] = {
 				name = "바위 심장부",
 				difficulty = {"normal", "heroic"},
 				keywords = {"바심", "심장부"},
 			},
-			[10] = {
+			[9] = {
 				name = "시초의 전당",
 				difficulty = {"normal", "heroic"},
 				keywords = {"시초"},
 			},
-			[11] = {
+			[10] = {
 				name = "톨비르의 잃어버린 도시",
 				difficulty = {"normal", "heroic"},
 				keywords = {"톨비르"},
 			},
-			[12] = {
+			[11] = {
 				name = "파도의 왕좌",
 				difficulty = {"normal", "heroic"},
 				keywords = {"파도", "파왕"},
 			},
-			[13] = {
+			[12] = {
 				name = "그림자송곳니 성채",
 				difficulty = {"normal", "heroic"},
 				keywords = {"그림자", "성채", "송곳니", "그송"},
 				excludekeywords = {"우트", "드락", "얼음왕관"},
 			},
-			[14] = {
+			[13] = {
 				name = "죽음의 폐광",
 				difficulty = {"normal", "heroic"},
 				keywords = {"폐광"},
 			},
 		},
 	},
-	[5] = {
+	[6] = {
 		category = "리치 왕의 분노 공격대",
 		dungeon = {
 			[1] = {
@@ -413,7 +420,7 @@ FP_DUNGEON_KEYWORDS = {
 			},
 		},
 	},
-	[6] = {
+	[7] = {
 		category = "리치 왕의 분노 던전",
 		dungeon = {
 			[1] = {
@@ -504,7 +511,7 @@ FP_DUNGEON_KEYWORDS = {
 			},
 		},
 	},
-	[7] = {
+	[8] = {
 		category = "불타는 성전 공격대",
 		dungeon = {
 			[1] = {
@@ -558,7 +565,7 @@ FP_DUNGEON_KEYWORDS = {
 			},
 		},
 	},
-	[8] = {
+	[9] = {
 		category = "불타는 성전 던전",
 		dungeon = {
 			[1] = {
@@ -646,13 +653,13 @@ FP_DUNGEON_KEYWORDS = {
 			},
 		},
 	},
-	[9] = {
+	[10] = {
 		category = "오리지널 공격대",
 		dungeon = {
 			[1] = {
 				name = "안퀴라즈 사원",
 				difficulty = {"legacy"},
-				keywords = {"안퀴사원", "안퀴", "사원"},
+				keywords = {"안퀴사원", "안퀴"},
 				excludekeywords = {"폐허", "페허", "가라앉은", "검은", "학카르"},
 			},
 			[2] = {
@@ -672,7 +679,7 @@ FP_DUNGEON_KEYWORDS = {
 			},
 		},
 	},
-	[10] = {
+	[11] = {
 		category = "오리지널 던전",
 		dungeon = {
 			[1] = {
@@ -775,7 +782,7 @@ FP_DUNGEON_KEYWORDS = {
 			},
 		},
 	},
-	[11] = {
+	[12] = {
 		category = "PvP",
 		dungeon = {
 			[1] = {
@@ -792,7 +799,7 @@ FP_DUNGEON_KEYWORDS = {
 			},
 		},
 	},
-	[12] = {
+	[13] = {
 		name = "퀘스트",
 		difficulty = {"quest"},
 		keywords = {"퀘", "하실", "입장퀘", "투기장", "도가니", "평작"},
